@@ -246,7 +246,7 @@ function Body({ onAddTransaction }: { onAddTransaction: (type: "income" | "expen
           <div className="donut-panel relative w-full animate-fade-up fx-pie" style={{ height: 240, minWidth: 0 }}>
             {byCat.length > 0 && <ResponsiveContainer onResize={(w, h) => setSize({ w, h })}><PieChart margin={{ top: 0, bottom: 0, left: 0, right: 0 }}>
               <Pie data={byCat} cx="50%" cy="50%" dataKey="value" className="cursor-pointer" onClick={(_, i) => byCat[i] && catDetails(byCat[i]!)}
-                innerRadius={Math.max(30, Math.min(size.w, size.h) * 0.29)} outerRadius={Math.max(42, Math.min(size.w, size.h) * 0.39)} paddingAngle={3} cornerRadius={6} stroke="none" startAngle={90} endAngle={450}
+                innerRadius={Math.max(30, Math.min(size.w, size.h) * 0.29)} outerRadius={Math.max(42, Math.min(size.w, size.h) * 0.39)} paddingAngle={3} cornerRadius={6} stroke="var(--background)" strokeWidth={2} startAngle={90} endAngle={450}
                 animationBegin={150} animationDuration={1200} animationEasing="ease-out">
                 {byCat.map((c) => <Cell key={c.id} fill={c.color} style={{ filter: `drop-shadow(0 0 6px ${c.color})` }} />)}
               </Pie>
@@ -258,7 +258,7 @@ function Body({ onAddTransaction }: { onAddTransaction: (type: "income" | "expen
           </div>
           <div className="min-w-0 space-y-2">
             <h3 className="text-xs font-semibold text-muted-foreground">CATEGORIAS</h3>
-            {[...byCat].sort((a, b) => a.value - b.value).map((c, index) => (
+            {byCat.map((c, index) => (
               <button key={c.id} type="button" onClick={() => catDetails(c)}
                 className="flex w-full min-w-0 items-center gap-1.5 rounded-md px-1 py-1.5 text-left transition-colors hover:bg-muted/60 active:scale-[0.98]">
                 <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: c.color }} />
