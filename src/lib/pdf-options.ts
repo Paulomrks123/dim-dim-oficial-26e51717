@@ -1,0 +1,2 @@
+export type PdfOptions = { textSize: "normal" | "large" | "xlarge"; contrast: "standard" | "high"; orientation: "portrait" | "landscape" };
+export const defaultPdfOptions: PdfOptions = { textSize: "normal", contrast: "high", orientation: "portrait" };

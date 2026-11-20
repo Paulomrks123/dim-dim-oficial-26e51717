@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+<defs>
+ <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#020a07"/><stop offset=".5" stop-color="#09251a"/><stop offset="1" stop-color="#153b29"/></linearGradient>
+ <linearGradient id="ridge" x2="0" y2="1"><stop stop-color="#24583b"/><stop offset="1" stop-color="#06170f"/></linearGradient>
+ <linearGradient id="front" x2="0" y2="1"><stop stop-color="#16432b"/><stop offset="1" stop-color="#020a06"/></linearGradient>
+ <radialGradient id="moon"><stop stop-color="#b5d9a2" stop-opacity=".24"/><stop offset="1" stop-color="#b5d9a2" stop-opacity="0"/></radialGradient>
+ <filter id="soft"><feGaussianBlur stdDeviation="30"/></filter>
+</defs>
+<rect width="1600" height="900" fill="url(#sky)"/>
+<ellipse cx="1190" cy="260" rx="360" ry="260" fill="url(#moon)"/>
+<circle cx="1190" cy="240" r="110" fill="#a8c89b" opacity=".08" filter="url(#soft)"/>
+<path d="M0 510 170 390 310 470 500 300 690 480 890 330 1080 470 1290 300 1450 430 1600 350V900H0Z" fill="#153a28" opacity=".75"/>
+<path d="M0 600Q230 420 440 555T850 510T1250 535T1600 465V900H0Z" fill="url(#ridge)"/>
+<path d="M0 680Q260 540 510 655T1000 600T1390 620T1600 575V900H0Z" fill="url(#front)"/>
+<path d="M0 760Q300 650 610 735T1120 690T1600 700V900H0Z" fill="#020b07"/>
+<g fill="#020b07">
+ <path d="M80 900V610l-48 90 40-12-62 102 68-22-78 132h160l-78-132 68 22-62-102 40 12-48-90Z"/>
+ <path d="M230 900V680l-36 68 30-9-48 78 54-18-62 105h128l-62-105 54 18-48-78 30 9-40-68Z"/>
+ <path d="M1430 900V600l-48 90 40-12-62 102 68-22-78 132h160l-78-132 68 22-62-102 40 12-48-90Z"/>
+ <path d="M1560 900V690l-34 64 29-8-46 74 52-17-60 97h120l-60-97 52 17-46-74 29 8-36-64Z"/>
+</g>
+<g class="eagle-flight" fill="#010704" stroke="#183b29" stroke-width="3" stroke-linejoin="round">
+ <path d="M-18 4C-95-5-190-65-300-105-270-65-252-28-214-5-270-18-324-37-390-70-350-25-300 8-242 26-300 28-350 22-420 2-358 58-276 78-202 54-130 36-78 24-30 25Z" class="wing wing-left"/>
+ <path d="M18 4C95-5 190-65 300-105 270-65 252-28 214-5 270-18 324-37 390-70 350-25 300 8 242 26 300 28 350 22 420 2 358 58 276 78 202 54 130 36 78 24 30 25Z" class="wing wing-right"/>
+ <path d="M-55 10Q0-16 55 10L38 82 0 112-38 82Z"/>
+ <path d="M-22 68 0 132 22 68 0 87Z"/>
+ <path d="M48-3Q86-20 102-4L78 18 52 15Z"/>
+ <path d="M88-6 119 2 99 13 78 11Z" fill="#b8a36a" stroke="none"/>
+</g>
+<style>
+.eagle-flight{transform-box:view-box;transform-origin:0 0;animation:eagle-cross 24s linear infinite}
+.wing-left{transform-box:fill-box;transform-origin:100% 12%;animation:flap-left .9s ease-in-out infinite alternate}
+.wing-right{transform-box:fill-box;transform-origin:0 12%;animation:flap-right .9s ease-in-out infinite alternate}
+@keyframes eagle-cross{0%{transform:translate(1850px,205px) scale(.68) rotate(-4deg)}48%{transform:translate(790px,165px) scale(1) rotate(1deg)}100%{transform:translate(-520px,235px) scale(.72) rotate(5deg)}}
+@keyframes flap-left{from{transform:rotate(-13deg) scaleY(.8)}to{transform:rotate(15deg) scaleY(1.13)}}
+@keyframes flap-right{from{transform:rotate(13deg) scaleY(.8)}to{transform:rotate(-15deg) scaleY(1.13)}}
+@media(prefers-reduced-motion:reduce){.eagle-flight,.wing-left,.wing-right{animation:none!important}}
+</style></svg>
