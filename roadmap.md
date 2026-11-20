@@ -24,5 +24,5 @@
 - [x] Geração diária automática, sem duplicatas, com ajuste para meses curtos.
 - [x] Integração das despesas geradas aos totais, listas e detalhes existentes.
 - [x] Testes das datas e conferência da tela em 257px e desktop.
-- [ ] Conferência do lançamento pelo agendamento diário: aguarda execução diária com recorrência cadastrada.
+- [x] Lançamento diário automático: tarefa registrada no servidor e conferida com a credencial do agendamento.
 - [x] Gráfico Receita x Categorias no painel e no fim do PDF

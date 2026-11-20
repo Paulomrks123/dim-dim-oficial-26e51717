@@ -12,7 +12,7 @@ import { lovable } from "@/integrations/lovable/index";
 import { followingMonth, useSession } from "@/lib/recurring";
 import { setState, today, uid, useStore, type Transaction, type TxType } from "@/lib/store";
 
-export function TransactionDialog({ open, onOpenChange, editing, initialCategoryId, initialType }: { open: boolean; onOpenChange: (o: boolean) => void; editing?: Transaction | null; initialCategoryId?: string; initialType?: TxType }) {
+export function TransactionDialog({ open, onOpenChange, editing, initialCategoryId, initialType }: { open: boolean; onOpenChange: (o: boolean) => void; editing?: Transaction | null | undefined; initialCategoryId?: string | undefined; initialType?: TxType | undefined }) {
   const { categories } = useStore();
   const [type, setType] = useState<TxType>("expense");
   const [amount, setAmount] = useState("");

@@ -17,6 +17,7 @@ import { Route as RecorrentesRouteImport } from './routes/recorrentes'
 import { Route as RelatoriosRouteImport } from './routes/relatorios'
 import { Route as TransacoesRouteImport } from './routes/transacoes'
 import { Route as MesMonthKeyRouteImport } from './routes/mes.$monthKey'
+import { Route as ApiPublicJobsRecurringExpensesRouteImport } from './routes/api/public/jobs/recurring-expenses'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -58,6 +59,12 @@ const MesMonthKeyRoute = MesMonthKeyRouteImport.update({
   path: '/mes/$monthKey',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicJobsRecurringExpensesRoute =
+  ApiPublicJobsRecurringExpensesRouteImport.update({
+    id: '/api/public/jobs/recurring-expenses',
+    path: '/api/public/jobs/recurring-expenses',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -68,6 +75,7 @@ export interface FileRoutesByFullPath {
   '/relatorios': typeof RelatoriosRoute
   '/transacoes': typeof TransacoesRoute
   '/mes/$monthKey': typeof MesMonthKeyRoute
+  '/api/public/jobs/recurring-expenses': typeof ApiPublicJobsRecurringExpensesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -78,6 +86,7 @@ export interface FileRoutesByTo {
   '/relatorios': typeof RelatoriosRoute
   '/transacoes': typeof TransacoesRoute
   '/mes/$monthKey': typeof MesMonthKeyRoute
+  '/api/public/jobs/recurring-expenses': typeof ApiPublicJobsRecurringExpensesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -89,6 +98,7 @@ export interface FileRoutesById {
   '/relatorios': typeof RelatoriosRoute
   '/transacoes': typeof TransacoesRoute
   '/mes/$monthKey': typeof MesMonthKeyRoute
+  '/api/public/jobs/recurring-expenses': typeof ApiPublicJobsRecurringExpensesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -101,6 +111,7 @@ export interface FileRouteTypes {
     | '/relatorios'
     | '/transacoes'
     | '/mes/$monthKey'
+    | '/api/public/jobs/recurring-expenses'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -111,6 +122,7 @@ export interface FileRouteTypes {
     | '/relatorios'
     | '/transacoes'
     | '/mes/$monthKey'
+    | '/api/public/jobs/recurring-expenses'
   id:
     | '__root__'
     | '/'
@@ -121,6 +133,7 @@ export interface FileRouteTypes {
     | '/relatorios'
     | '/transacoes'
     | '/mes/$monthKey'
+    | '/api/public/jobs/recurring-expenses'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -132,6 +145,7 @@ export interface RootRouteChildren {
   RelatoriosRoute: typeof RelatoriosRoute
   TransacoesRoute: typeof TransacoesRoute
   MesMonthKeyRoute: typeof MesMonthKeyRoute
+  ApiPublicJobsRecurringExpensesRoute: typeof ApiPublicJobsRecurringExpensesRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -192,6 +206,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MesMonthKeyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/recurring-expenses': {
+      id: '/api/public/jobs/recurring-expenses'
+      path: '/api/public/jobs/recurring-expenses'
+      fullPath: '/api/public/jobs/recurring-expenses'
+      preLoaderRoute: typeof ApiPublicJobsRecurringExpensesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -204,6 +225,7 @@ const rootRouteChildren: RootRouteChildren = {
   RelatoriosRoute: RelatoriosRoute,
   TransacoesRoute: TransacoesRoute,
   MesMonthKeyRoute: MesMonthKeyRoute,
+  ApiPublicJobsRecurringExpensesRoute: ApiPublicJobsRecurringExpensesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
