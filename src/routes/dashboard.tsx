@@ -44,26 +44,40 @@ function CatName({ name, upper }: { name: string; upper?: boolean }) {
 const compactBrl = (n: number) => n >= 1000 ? `R$${(n / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}mil` : `R$${Math.round(n)}`;
 
 type Slice = { id: string; name: string; color: string; value: number; icon?: string | undefined };
-function ArrowLabels({ data, h, total }: { data: Slice[]; h: number; total: number }) {
-  if (!total || data.length === 0) return null;
-  const cx = 200, cy = h / 2, r = Math.min(112, h * 0.34);
+function ArrowLabels({ data, w, h }: { data: Slice[]; w: number; h: number }) {
+  if (!w || !h || data.length === 0) return null;
+  const cx = w / 2, cy = h / 2;
+  const outerRadius = Math.max(34, Math.min(w, h) * 0.30);
+  const categoryTotal = data.reduce((sum, item) => sum + item.value, 0);
   const paddingAngle = 3;
   const usableAngle = Math.max(0, 360 - data.length * paddingAngle);
-  let cum = 0;
+  const rowHeight = 48;
+  const listTop = (h - data.length * rowHeight) / 2;
+  let cumulativeAngle = 0;
   const points = data.map((item, index) => {
-    const sliceAngle = (item.value / total) * usableAngle;
-    const deg = 90 + cum + sliceAngle / 2;
-    cum += sliceAngle + paddingAngle;
-    const rad = (-deg * Math.PI) / 180;
-    const y = 24 + index * 48;
-    return { ...item, sx: cx + r * Math.cos(rad), sy: cy + r * Math.sin(rad), y };
+    const sliceAngle = categoryTotal > 0 ? (item.value / categoryTotal) * usableAngle : 0;
+    const middleAngle = 90 + cumulativeAngle + sliceAngle / 2;
+    cumulativeAngle += sliceAngle + paddingAngle;
+    const radians = (-middleAngle * Math.PI) / 180;
+    return {
+      ...item,
+      sx: cx + outerRadius * Math.cos(radians),
+      sy: cy + outerRadius * Math.sin(radians),
+      targetY: listTop + index * rowHeight + rowHeight / 2,
+    };
   });
   return (
-    <svg className="pointer-events-none absolute inset-0 h-full w-full overflow-visible" viewBox={`0 0 1000 ${h}`} preserveAspectRatio="none" aria-hidden="true">
-      {points.map((p) => (
-        <g key={p.id}>
-          <path d={`M${p.sx},${p.sy} C${p.sx + 65},${p.sy} 315,${p.y} 410,${p.y}`} stroke={p.color} strokeWidth="2" strokeLinecap="round" fill="none" />
-          <path d={`M402,${p.y - 4} L410,${p.y} L402,${p.y + 4}`} stroke={p.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    <svg className="pointer-events-none absolute inset-0 h-full w-full overflow-visible" viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" aria-hidden="true">
+      {points.map((point) => (
+        <g key={point.id}>
+          <path
+            d={`M${point.sx},${point.sy} C${point.sx + 22},${point.sy} ${w - 24},${point.targetY} ${w + 5},${point.targetY}`}
+            stroke={point.color}
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            fill="none"
+          />
+          <path d={`M${w - 2},${point.targetY - 4} L${w + 5},${point.targetY} L${w - 2},${point.targetY + 4}`} stroke={point.color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" fill="none" />
         </g>
       ))}
     </svg>
@@ -187,7 +201,7 @@ function Body({ onAddTransaction }: { onAddTransaction: (type: "income" | "expen
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
-                <ArrowLabels data={byCat} h={Math.max(240, byCat.length * 48 + 24)} total={m.expense} />
+                <ArrowLabels data={byCat} w={size.w} h={size.h} />
                 <div className="absolute inset-y-0 right-0 z-20 flex w-[58%] flex-col justify-center py-3">
                   {byCat.map((c) => (
                     <button key={c.id} type="button" onClick={() => catDetails(c)} className="flex min-h-[48px] w-full min-w-0 items-center justify-between gap-2 border-b border-border/60 px-1.5 text-left last:border-0">
@@ -196,15 +210,15 @@ function Body({ onAddTransaction }: { onAddTransaction: (type: "income" | "expen
                         <span className="truncate text-xs font-semibold">{c.icon ? `${c.icon} ` : ""}{c.name}</span>
                       </span>
                       <span className="shrink-0 text-right text-[11px] tabular-nums">
-                        <span className="block font-semibold">{compactBrl(c.value)}</span>
-                        <span className="text-muted-foreground">{m.expense ? ((c.value / m.expense) * 100).toFixed(0) : 0}%</span>
+                        <span className="block font-semibold">{brl(c.value)}</span>
+                        <span className="text-muted-foreground">{m.expense ? ((c.value / m.expense) * 100).toFixed(1) : "0.0"}%</span>
                       </span>
                     </button>
                   ))}
                 </div>
                 <div className="pointer-events-none absolute left-0 top-1/2 z-20 flex w-[40%] -translate-y-1/2 flex-col items-center justify-center">
                   <span className="text-[9px] text-muted-foreground">Total</span>
-                  <span className="font-display text-center text-[10px] font-bold leading-tight">{compactBrl(m.expense)}</span>
+                  <span className="font-display text-center text-[10px] font-bold leading-tight">{brl(m.expense)}</span>
                 </div>
               </>
             )}
