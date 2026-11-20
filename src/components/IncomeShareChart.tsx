@@ -23,7 +23,7 @@ export function IncomeShareChart({ transactions, categories, month, onPick }: { 
                 <div className="share-row-copy flex min-w-0 items-start justify-between gap-2 text-sm">
                   <div className="flex min-w-0 flex-col items-start">
                     <span className="min-w-0 break-words font-semibold">{r.icon ? `${r.icon} ` : ""}{r.name}</span>
-                    <span className="mt-0.5 text-xs font-normal text-muted-foreground">
+                    <span className={`mt-1 text-sm font-semibold tabular-nums ${category?.limit ? r.value > category.limit ? "text-destructive" : "text-emerald-500" : "text-muted-foreground"}`}>
                       {category?.limit ? `Limite: ${brl(category.limit)}` : "Sem limite"}
                     </span>
                   </div>
