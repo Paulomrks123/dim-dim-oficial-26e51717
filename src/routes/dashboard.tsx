@@ -41,104 +41,31 @@ function CatName({ name, upper }: { name: string; upper?: boolean }) {
   );
 }
 
-const chartGeom = (w: number, h: number) => {
-  const narrow = w < 340;
-  const label = w < 260 ? 62 : narrow ? 72 : 100;
-  const r = Math.max(40, Math.min((h / 2) * 0.6, h / 2 - 48, w / 2 - label - (narrow ? 8 : 22)));
-  return { narrow, label, r };
-};
 const compactBrl = (n: number) => n >= 1000 ? `R$${(n / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}mil` : `R$${Math.round(n)}`;
-const clip = (t: string, max: number) => (t.length > max ? t.slice(0, max - 1) + "…" : t);
 
 type Slice = { id: string; name: string; color: string; value: number; icon?: string | undefined };
-function ArrowLabels({ data, w, h, total, onPick }: { data: Slice[]; w: number; h: number; total: number; onPick: (id: string) => void }) {
-  if (!w || !total) return null;
-  const cx = w * 0.50, cy = h / 2; const { narrow, label, r } = chartGeom(w, h);
-  // Espelha a geometria do Recharts (Pie): em um círculo completo,
-  // o padding é removido uma vez por setor e os ângulos restantes são
-  // distribuídos proporcionalmente aos valores, na mesma ordem dos Cells.
+function ArrowLabels({ data, h, total }: { data: Slice[]; h: number; total: number }) {
+  if (!total || data.length === 0) return null;
+  const cx = 200, cy = h / 2, r = Math.min(112, h * 0.34);
   const paddingAngle = 3;
   const usableAngle = Math.max(0, 360 - data.length * paddingAngle);
   let cum = 0;
-  const items = data.map((d) => {
-    const sliceAngle = (d.value / total) * usableAngle;
+  const points = data.map((item, index) => {
+    const sliceAngle = (item.value / total) * usableAngle;
     const deg = 90 + cum + sliceAngle / 2;
     cum += sliceAngle + paddingAngle;
-    // Recharts converte o ângulo polar usando -angle: 90° fica no topo,
-    // 180° à esquerda e 270° embaixo. Reproduzimos exatamente essa convenção.
-    const rad = (-deg * Math.PI) / 180, cos = Math.cos(rad), sin = Math.sin(rad);
-    return { ...d, cos, sin, right: cos > 0, zone: (sin < -0.8 ? "top" : sin > 0.8 ? "bottom" : "side") as "top" | "bottom" | "side", x: 0, y: cy + (r + 18) * sin };
+    const rad = (-deg * Math.PI) / 180;
+    const y = 24 + index * 48;
+    return { ...item, sx: cx + r * Math.cos(rad), sy: cy + r * Math.sin(rad), y };
   });
-  const MIN = narrow ? 30 : 34;
-  for (const right of [true, false]) {
-    const side = items.filter((item) => item.zone === "side" && item.right === right)
-      .map((item) => ({ item, want: cy + (r + 30) * item.sin * 1.35 }))
-      .sort((x, y) => x.want - y.want);
-    let prev = -Infinity;
-    for (const s of side) { s.item.y = Math.max(18, s.want, prev + MIN); prev = s.item.y; }
-    let over = prev - (h - 18);
-    for (let i = side.length - 1; i >= 0 && over > 0; i--) {
-      const it = side[i]!.item; it.y -= over;
-      over = i > 0 ? side[i - 1]!.item.y - (it.y - MIN) : 0;
-    }
-  }
-  const W = label + 6;
-  for (const zone of ["top", "bottom"] as const) {
-    const row = items.filter((item) => item.zone === zone)
-      .map((item) => ({ item, want: cx - (r + 20) * item.cos * 1.8 }))
-      .sort((a, b) => a.want - b.want);
-    const lo = W / 2, hi = w - W / 2;
-    const available = Math.max(W, hi - lo);
-    const perLane = Math.max(1, Math.floor(available / W));
-    const laneCount = Math.ceil(row.length / perLane);
-
-    // Cada faixa recebe apenas rótulos que cabem lado a lado, sem colisões.
-    for (let lane = 0; lane < laneCount; lane++) {
-      const group = row.slice(lane * perLane, (lane + 1) * perLane);
-      group.forEach((entry, index) => {
-        const x = group.length === 1
-          ? (lo + hi) / 2
-          : lo + ((hi - lo) * index) / (group.length - 1);
-        entry.item.x = x;
-        entry.item.y = zone === "top"
-          ? 24 + lane * 48
-          : h - 24 - lane * 48;
-      });
-    }
-  }
   return (
-    <svg className="pointer-events-none absolute inset-0 overflow-visible" width={w} height={h}>
-      <defs>{items.map((d) => <marker key={d.id} id={`ar-${d.id}`} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill={d.color} /></marker>)}</defs>
-      {items.map((d, i) => {
-        // O endpoint usa o mesmo raio externo informado ao componente Pie.
-        const sx = cx + r * d.cos, sy = cy + r * d.sin;
-        const ex = cx + (d.right ? 1 : -1) * (r + (narrow ? 12 : 22));
-        const tx = d.right ? w - 2 : 2;
-        const fs = narrow ? 9.5 : 11.5;
-        const name = clip(d.name.split(" • ")[0]!.toUpperCase(), narrow ? 10 : 16);
-        const pct = ((d.value / total) * 100).toFixed(0);
-        const anchor = d.right ? "end" : "start";
-        if (d.zone !== "side") {
-          const top = d.zone === "top";
-          const ly = top ? d.y + 16 : d.y - 14;
-          return (
-            <g key={d.id} role="button" tabIndex={0} aria-label={`Detalhes de ${d.name}`} onClick={() => onPick(d.id)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onPick(d.id); } }} className="pointer-events-auto cursor-pointer animate-fade-in" style={{ animationDelay: `${900 + i * 90}ms` }}>
-              <rect x={d.x - label / 2} y={d.y - 20} width={label} height={44} rx={8} fill="transparent" />
-              <path d={`M${d.x},${ly} Q${d.x},${cy + (r + 18) * d.sin} ${cx + (r + 10) * d.cos},${cy + (r + 10) * d.sin} L${sx},${sy}`} stroke={d.color} strokeWidth={1.4} strokeLinecap="round" fill="none" markerEnd={`url(#ar-${d.id})`} />
-              <text x={d.x} y={d.y - 2} textAnchor="middle" fill={d.color} fontSize={fs} fontWeight={800}>{d.icon && !narrow ? `${d.icon} ${name}` : name}</text>
-              <text x={d.x} y={d.y + 10} textAnchor="middle" fill="var(--foreground)" fontSize={fs - 1} fontWeight={600}>{w < 300 ? compactBrl(d.value) : brl(d.value)} · {pct}%</text>
-            </g>
-          );
-        }
-        return (
-          <g key={d.id} role="button" aria-label={`Detalhes de ${d.name}`} onClick={() => onPick(d.id)} className="pointer-events-auto cursor-pointer animate-fade-in" style={{ animationDelay: `${900 + i * 90}ms` }}>
-            <rect x={d.right ? w - label : 0} y={d.y - 22} width={label + 4} height={44} rx={8} fill="transparent" />
-            <path d={`M${d.right ? Math.max(w - label - 4, ex) : Math.min(label + 4, ex)},${d.y} L${ex},${d.y} Q${cx + (r + (narrow ? 14 : 24)) * d.cos},${d.y} ${cx + (r + 10) * d.cos},${cy + (r + 10) * d.sin} L${sx},${sy}`} stroke={d.color} strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round" fill="none" markerEnd={`url(#ar-${d.id})`} />
-            <text x={tx} y={d.y - 4} textAnchor={anchor} fill={d.color} fontSize={fs} fontWeight={800}>{d.icon && !narrow ? `${d.icon} ${name}` : name}</text>
-            <text x={tx} y={d.y + 10} textAnchor={anchor} fill="var(--foreground)" fontSize={fs - 1} fontWeight={600}>{w < 300 ? compactBrl(d.value) : brl(d.value)} · {pct}%</text>
-          </g>
-        );
-      })}
+    <svg className="pointer-events-none absolute inset-0 h-full w-full overflow-visible" viewBox={`0 0 1000 ${h}`} preserveAspectRatio="none" aria-hidden="true">
+      {points.map((p) => (
+        <g key={p.id}>
+          <path d={`M${p.sx},${p.sy} C${p.sx + 65},${p.sy} 315,${p.y} 410,${p.y}`} stroke={p.color} strokeWidth="2" strokeLinecap="round" fill="none" />
+          <path d={`M402,${p.y - 4} L410,${p.y} L402,${p.y + 4}`} stroke={p.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+        </g>
+      ))}
     </svg>
   );
 }
@@ -244,29 +171,44 @@ function Body({ onAddTransaction }: { onAddTransaction: (type: "income" | "expen
         {/* Receita x Categorias: mantém o limite mensal abaixo de cada categoria */}
         <IncomeShareChart transactions={transactions} categories={categories} month={mk} onPick={(id) => { const c = categories.find((x) => x.id === id); if (c) catDetails(c); }} />
 
-        {/* Despesas x Categorias — gráfico livre, sem lista lateral */}
+        {/* Despesas x Categorias — gráfico compacto à esquerda e categorias à direita */}
         <section className="dashboard-charts w-full">
-          <div className="donut-panel relative w-full animate-fade-up fx-pie" style={{ height: 300, minWidth: 0 }}>
-            {byCat.length > 0 && <ResponsiveContainer onResize={(w, h) => setSize({ w, h })}><PieChart margin={{ top: 0, bottom: 0, left: 0, right: 0 }}>
-              <Pie data={byCat} cx="50%" cy="50%" dataKey="value" className="cursor-pointer" onClick={(_, i) => byCat[i] && catDetails(byCat[i]!)}
-                innerRadius={Math.max(30, Math.min(size.w, size.h) * 0.29)} outerRadius={Math.max(42, Math.min(size.w, size.h) * 0.39)} paddingAngle={3} cornerRadius={6} stroke="var(--background)" strokeWidth={2} startAngle={90} endAngle={450}
-                animationBegin={150} animationDuration={1200} animationEasing="ease-out">
-                {byCat.map((c) => <Cell key={c.id} fill={c.color} style={{ filter: `drop-shadow(0 0 6px ${c.color})` }} />)}
-              </Pie>
-            </PieChart></ResponsiveContainer>}
-            {byCat.length > 0 && size.w > 0 && size.h > 0 && (
-              <ArrowLabels
-                data={byCat}
-                w={size.w}
-                h={size.h}
-                total={m.expense}
-                onPick={(id) => { const c = byCat.find((item) => item.id === id); if (c) catDetails(c); }}
-              />
+          <div className="donut-panel relative w-full animate-fade-up fx-pie" style={{ height: Math.max(240, byCat.length * 48 + 24), minWidth: 0 }}>
+            {byCat.length > 0 && (
+              <>
+                <div className="absolute inset-y-0 left-0 z-10 w-[40%]">
+                  <ResponsiveContainer onResize={(w, h) => setSize({ w, h })}>
+                    <PieChart margin={{ top: 0, bottom: 0, left: 0, right: 0 }}>
+                      <Pie data={byCat} cx="50%" cy="50%" dataKey="value" className="cursor-pointer" onClick={(_, i) => byCat[i] && catDetails(byCat[i]!)}
+                        innerRadius={Math.max(24, Math.min(size.w, size.h) * 0.22)} outerRadius={Math.max(34, Math.min(size.w, size.h) * 0.30)} paddingAngle={3} cornerRadius={5} stroke="var(--background)" strokeWidth={2} startAngle={90} endAngle={450}
+                        animationBegin={150} animationDuration={1200} animationEasing="ease-out">
+                        {byCat.map((c) => <Cell key={c.id} fill={c.color} style={{ filter: `drop-shadow(0 0 4px ${c.color})` }} />)}
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <ArrowLabels data={byCat} h={Math.max(240, byCat.length * 48 + 24)} total={m.expense} />
+                <div className="absolute inset-y-0 right-0 z-20 flex w-[58%] flex-col justify-center py-3">
+                  {byCat.map((c) => (
+                    <button key={c.id} type="button" onClick={() => catDetails(c)} className="flex min-h-[48px] w-full min-w-0 items-center justify-between gap-2 border-b border-border/60 px-1.5 text-left last:border-0">
+                      <span className="flex min-w-0 items-center gap-1.5">
+                        <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: c.color }} />
+                        <span className="truncate text-xs font-semibold">{c.icon ? `${c.icon} ` : ""}{c.name}</span>
+                      </span>
+                      <span className="shrink-0 text-right text-[11px] tabular-nums">
+                        <span className="block font-semibold">{compactBrl(c.value)}</span>
+                        <span className="text-muted-foreground">{m.expense ? ((c.value / m.expense) * 100).toFixed(0) : 0}%</span>
+                      </span>
+                    </button>
+                  ))}
+                </div>
+                <div className="pointer-events-none absolute left-0 top-1/2 z-20 flex w-[40%] -translate-y-1/2 flex-col items-center justify-center">
+                  <span className="text-[9px] text-muted-foreground">Total</span>
+                  <span className="font-display text-center text-[10px] font-bold leading-tight">{compactBrl(m.expense)}</span>
+                </div>
+              </>
             )}
-            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-[10px] text-muted-foreground">Total</span>
-              <span className="font-display text-center text-[10px] font-bold leading-tight">{compactBrl(m.expense)}</span>
-            </div>
+            {byCat.length === 0 && <p className="py-8 text-center text-sm text-muted-foreground">Sem despesas neste mês.</p>}
           </div>
         </section>
 
