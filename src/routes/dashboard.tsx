@@ -242,22 +242,31 @@ function Body({ onAddTransaction }: { onAddTransaction: (type: "income" | "expen
         </div>
 
         {/* Gastos por categoria */}
-        <section className="dashboard-charts">
-          <IncomeShareChart transactions={transactions} categories={categories} month={mk} onPick={(id) => { const c = categories.find((x) => x.id === id); if (c) catDetails(c); }} />
-          <div className="donut-panel relative mx-auto w-full animate-fade-up fx-pie" style={{ height: Math.max(350, Math.ceil(byCat.length / 2) * 48) }}>
+        <section className="dashboard-charts" style={{ display: "grid", gridTemplateColumns: "minmax(0, 0.85fr) minmax(0, 1.15fr)", alignItems: "center", gap: 8 }}>
+          <div className="donut-panel relative w-full animate-fade-up fx-pie" style={{ height: 240, minWidth: 0 }}>
             {byCat.length > 0 && <ResponsiveContainer onResize={(w, h) => setSize({ w, h })}><PieChart margin={{ top: 0, bottom: 0, left: 0, right: 0 }}>
-              <Pie data={byCat} cx="40%" dataKey="value" className="cursor-pointer" onClick={(_, i) => byCat[i] && catDetails(byCat[i]!)}
-                innerRadius={chartGeom(size.w, size.h).r * 0.74} outerRadius={chartGeom(size.w, size.h).r} paddingAngle={3} cornerRadius={6} stroke="none" startAngle={90} endAngle={450}
-                animationBegin={150} animationDuration={1200} animationEasing="ease-out"
-                labelLine={false}>
+              <Pie data={byCat} cx="50%" cy="50%" dataKey="value" className="cursor-pointer" onClick={(_, i) => byCat[i] && catDetails(byCat[i]!)}
+                innerRadius={Math.max(30, Math.min(size.w, size.h) * 0.29)} outerRadius={Math.max(42, Math.min(size.w, size.h) * 0.39)} paddingAngle={3} cornerRadius={6} stroke="none" startAngle={90} endAngle={450}
+                animationBegin={150} animationDuration={1200} animationEasing="ease-out">
                 {byCat.map((c) => <Cell key={c.id} fill={c.color} style={{ filter: `drop-shadow(0 0 6px ${c.color})` }} />)}
               </Pie>
             </PieChart></ResponsiveContainer>}
-            <ArrowLabels data={byCat} w={size.w} h={size.h} total={byCat.reduce((sum, category) => sum + category.value, 0)} onPick={(id) => { const c = byCat.find((x) => x.id === id); if (c) catDetails(c); }} />
-            <div className="pointer-events-none absolute inset-y-0 left-[40%] flex -translate-x-1/2 flex-col items-center justify-center">
-              {size.w >= 240 && <span className="text-[10px] text-muted-foreground">Total</span>}
-              <span className={`font-display font-bold ${size.w < 240 ? "text-[9px]" : "text-xs"}`}>{size.w < 240 ? compactBrl(m.expense) : brl(m.expense)}</span>
+            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+              <span className="text-[10px] text-muted-foreground">Total</span>
+              <span className="font-display text-center text-[10px] font-bold leading-tight">{compactBrl(m.expense)}</span>
             </div>
+          </div>
+          <div className="min-w-0 space-y-2">
+            <h3 className="text-xs font-semibold text-muted-foreground">CATEGORIAS</h3>
+            {[...byCat].sort((a, b) => a.value - b.value).map((c, index) => (
+              <button key={c.id} type="button" onClick={() => catDetails(c)}
+                className="flex w-full min-w-0 items-center gap-1.5 rounded-md px-1 py-1.5 text-left transition-colors hover:bg-muted/60 active:scale-[0.98]">
+                <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: c.color }} />
+                <span className="min-w-0 flex-1 truncate text-[11px]">{c.icon ? `${c.icon} ` : ""}{c.name.split(" • ")[0]}</span>
+                <span className="shrink-0 text-[11px] font-semibold tabular-nums">{compactBrl(c.value)}</span>
+              </button>
+            ))}
+            {byCat.length === 0 && <p className="text-xs text-muted-foreground">Sem despesas neste mês.</p>}
           </div>
         </section>
 
