@@ -5,10 +5,14 @@ import type { CSSProperties } from "react";
 
 export function IncomeShareChart({ transactions, categories, month, onPick }: { transactions: Transaction[]; categories: Category[]; month: string; onPick: (id: string) => void }) {
   const d = incomeShare(transactions, categories, month);
+  const totalLimit = categories.reduce((sum, category) => sum + (category.limit ?? 0), 0);
   return (
     <div className="income-share min-w-0 animate-fade-up">
-      <div className="mb-2 flex flex-wrap items-baseline justify-between gap-1">
-        <h2 className="font-semibold">Receita x Categorias</h2>
+      <div className="mb-2 flex flex-wrap items-start justify-between gap-1">
+        <div className="flex min-w-0 flex-col items-start">
+          <h2 className="font-semibold">Receita x Categorias</h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">Limite total: <span className="font-display font-semibold text-foreground">{brl(totalLimit)}</span></p>
+        </div>
         <p className="text-sm">Receita <span className="font-display font-bold text-primary">{brl(d.income)}</span></p>
       </div>
       {d.rows.length === 0 && <p className="py-3 text-center text-sm text-muted-foreground">Sem despesas neste mês.</p>}
