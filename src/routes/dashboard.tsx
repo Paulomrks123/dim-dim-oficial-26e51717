@@ -241,7 +241,10 @@ function Body({ onAddTransaction }: { onAddTransaction: (type: "income" | "expen
           </Button>
         </div>
 
-        {/* Gastos por categoria */}
+        {/* Receita x Categorias: mantém o limite mensal abaixo de cada categoria */}
+        <IncomeShareChart transactions={transactions} categories={categories} month={mk} onPick={(id) => { const c = categories.find((x) => x.id === id); if (c) catDetails(c); }} />
+
+        {/* Despesas x Categorias */}
         <section className="dashboard-charts" style={{ display: "grid", gridTemplateColumns: "minmax(0, 0.85fr) minmax(0, 1.15fr)", alignItems: "center", gap: 8 }}>
           <div className="donut-panel relative w-full animate-fade-up fx-pie" style={{ height: 240, minWidth: 0 }}>
             {byCat.length > 0 && <ResponsiveContainer onResize={(w, h) => setSize({ w, h })}><PieChart margin={{ top: 0, bottom: 0, left: 0, right: 0 }}>
