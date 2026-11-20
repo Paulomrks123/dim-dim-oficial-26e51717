@@ -46,19 +46,29 @@ const compactBrl = (n: number) => n >= 1000 ? `R$${(n / 1000).toLocaleString("pt
 type Slice = { id: string; name: string; color: string; value: number; icon?: string | undefined };
 function ArrowLabels({ data, w, h }: { data: Slice[]; w: number; h: number }) {
   if (!w || !h || data.length === 0) return null;
-  const cx = w / 2, cy = h / 2;
+
+  // O gráfico ocupa 40% do painel; o SVG usa a largura total para
+  // manter as linhas na mesma escala dos pontos e dos nomes.
+  const panelWidth = w / 0.4;
+  const cx = w / 2;
+  const cy = h / 2;
   const outerRadius = Math.max(34, Math.min(w, h) * 0.30);
   const categoryTotal = data.reduce((sum, item) => sum + item.value, 0);
   const paddingAngle = 3;
-  const usableAngle = Math.max(0, 360 - data.length * paddingAngle);
   const rowHeight = 48;
   const listTop = (h - data.length * rowHeight) / 2;
+  const targetX = panelWidth * 0.42 + 11;
   let cumulativeAngle = 0;
+
   const points = data.map((item, index) => {
-    const sliceAngle = categoryTotal > 0 ? (item.value / categoryTotal) * usableAngle : 0;
+    // Recharts distribui os valores pelos 360° e desconta o padding
+    // nas extremidades de cada fatia.
+    const valueAngle = categoryTotal > 0 ? (item.value / categoryTotal) * 360 : 0;
+    const sliceAngle = Math.max(0, valueAngle - paddingAngle);
     const middleAngle = 90 + cumulativeAngle + sliceAngle / 2;
-    cumulativeAngle += sliceAngle + paddingAngle;
+    cumulativeAngle += valueAngle;
     const radians = (-middleAngle * Math.PI) / 180;
+
     return {
       ...item,
       sx: cx + outerRadius * Math.cos(radians),
@@ -66,18 +76,31 @@ function ArrowLabels({ data, w, h }: { data: Slice[]; w: number; h: number }) {
       targetY: listTop + index * rowHeight + rowHeight / 2,
     };
   });
+
   return (
-    <svg className="pointer-events-none absolute inset-0 h-full w-full overflow-visible" viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" aria-hidden="true">
+    <svg
+      className="pointer-events-none absolute inset-0 h-full w-full overflow-visible"
+      viewBox={`0 0 ${panelWidth} ${h}`}
+      preserveAspectRatio="none"
+      aria-hidden="true"
+    >
       {points.map((point) => (
         <g key={point.id}>
           <path
-            d={`M${point.sx},${point.sy} C${point.sx + 22},${point.sy} ${w - 24},${point.targetY} ${w + 5},${point.targetY}`}
+            d={`M${point.sx},${point.sy} C${point.sx + 18},${point.sy} ${targetX - 24},${point.targetY} ${targetX},${point.targetY}`}
             stroke={point.color}
             strokeWidth="1.6"
             strokeLinecap="round"
             fill="none"
           />
-          <path d={`M${w - 2},${point.targetY - 4} L${w + 5},${point.targetY} L${w - 2},${point.targetY + 4}`} stroke={point.color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          <path
+            d={`M${targetX - 6},${point.targetY - 4} L${targetX},${point.targetY} L${targetX - 6},${point.targetY + 4}`}
+            stroke={point.color}
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            fill="none"
+          />
         </g>
       ))}
     </svg>
