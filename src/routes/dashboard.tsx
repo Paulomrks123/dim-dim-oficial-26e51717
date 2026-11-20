@@ -254,6 +254,15 @@ function Body({ onAddTransaction }: { onAddTransaction: (type: "income" | "expen
                 {byCat.map((c) => <Cell key={c.id} fill={c.color} style={{ filter: `drop-shadow(0 0 6px ${c.color})` }} />)}
               </Pie>
             </PieChart></ResponsiveContainer>}
+            {byCat.length > 0 && size.w > 0 && size.h > 0 && (
+              <ArrowLabels
+                data={byCat}
+                w={size.w}
+                h={size.h}
+                total={m.expense}
+                onPick={(id) => { const c = byCat.find((item) => item.id === id); if (c) catDetails(c); }}
+              />
+            )}
             <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
               <span className="text-[10px] text-muted-foreground">Total</span>
               <span className="font-display text-center text-[10px] font-bold leading-tight">{compactBrl(m.expense)}</span>
