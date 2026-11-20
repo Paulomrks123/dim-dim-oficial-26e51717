@@ -53,7 +53,7 @@ const clip = (t: string, max: number) => (t.length > max ? t.slice(0, max - 1) +
 type Slice = { id: string; name: string; color: string; value: number; icon?: string | undefined };
 function ArrowLabels({ data, w, h, total, onPick }: { data: Slice[]; w: number; h: number; total: number; onPick: (id: string) => void }) {
   if (!w || !total) return null;
-  const cx = w * 0.40, cy = h / 2; const { narrow, label, r } = chartGeom(w, h);
+  const cx = w * 0.50, cy = h / 2; const { narrow, label, r } = chartGeom(w, h);
   // Espelha a geometria do Recharts (Pie): em um círculo completo,
   // o padding é removido uma vez por setor e os ângulos restantes são
   // distribuídos proporcionalmente aos valores, na mesma ordem dos Cells.
@@ -244,9 +244,9 @@ function Body({ onAddTransaction }: { onAddTransaction: (type: "income" | "expen
         {/* Receita x Categorias: mantém o limite mensal abaixo de cada categoria */}
         <IncomeShareChart transactions={transactions} categories={categories} month={mk} onPick={(id) => { const c = categories.find((x) => x.id === id); if (c) catDetails(c); }} />
 
-        {/* Despesas x Categorias */}
-        <section className="dashboard-charts" style={{ display: "grid", gridTemplateColumns: "minmax(0, 0.85fr) minmax(0, 1.15fr)", alignItems: "center", gap: 8 }}>
-          <div className="donut-panel relative w-full animate-fade-up fx-pie" style={{ height: 240, minWidth: 0 }}>
+        {/* Despesas x Categorias — gráfico livre, sem lista lateral */}
+        <section className="dashboard-charts w-full">
+          <div className="donut-panel relative w-full animate-fade-up fx-pie" style={{ height: 300, minWidth: 0 }}>
             {byCat.length > 0 && <ResponsiveContainer onResize={(w, h) => setSize({ w, h })}><PieChart margin={{ top: 0, bottom: 0, left: 0, right: 0 }}>
               <Pie data={byCat} cx="50%" cy="50%" dataKey="value" className="cursor-pointer" onClick={(_, i) => byCat[i] && catDetails(byCat[i]!)}
                 innerRadius={Math.max(30, Math.min(size.w, size.h) * 0.29)} outerRadius={Math.max(42, Math.min(size.w, size.h) * 0.39)} paddingAngle={3} cornerRadius={6} stroke="var(--background)" strokeWidth={2} startAngle={90} endAngle={450}
@@ -267,18 +267,6 @@ function Body({ onAddTransaction }: { onAddTransaction: (type: "income" | "expen
               <span className="text-[10px] text-muted-foreground">Total</span>
               <span className="font-display text-center text-[10px] font-bold leading-tight">{compactBrl(m.expense)}</span>
             </div>
-          </div>
-          <div className="min-w-0 space-y-2">
-            <h3 className="text-xs font-semibold text-muted-foreground">CATEGORIAS</h3>
-            {byCat.map((c, index) => (
-              <button key={c.id} type="button" onClick={() => catDetails(c)}
-                className="flex w-full min-w-0 items-center gap-1.5 rounded-md px-1 py-1.5 text-left transition-colors hover:bg-muted/60 active:scale-[0.98]">
-                <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: c.color }} />
-                <span className="min-w-0 flex-1 truncate text-[11px]">{c.icon ? `${c.icon} ` : ""}{c.name.split(" • ")[0]}</span>
-                <span className="shrink-0 text-[11px] font-semibold tabular-nums">{compactBrl(c.value)}</span>
-              </button>
-            ))}
-            {byCat.length === 0 && <p className="text-xs text-muted-foreground">Sem despesas neste mês.</p>}
           </div>
         </section>
 
