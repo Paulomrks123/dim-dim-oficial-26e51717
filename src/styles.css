@@ -1463,3 +1463,54 @@ lovable-badge,
   }
   .dimdim-login-heading {margin-bottom:22px;}
 }
+
+/* Uploaded artwork, with real account controls instead of baked-in fields. */
+.image-login {
+  --login-background: oklch(0.105 0.022 155);
+  --login-text: oklch(0.97 0.008 150);
+  --login-edge: oklch(0.64 0.18 151);
+  --login-gold: oklch(0.83 0.12 88);
+  --login-field: oklch(0.16 0.028 155);
+  --login-button: linear-gradient(165deg, oklch(0.5 0.16 152), oklch(0.2 0.055 155) 65%, var(--login-background));
+  --login-button-shadow: inset 0 1px 2px var(--login-edge), 0 0 18px color-mix(in oklab, var(--login-edge) 18%, transparent);
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100dvh;
+  overflow: hidden;
+  background: var(--login-background);
+  color: var(--login-text);
+  padding-bottom: max(130px, env(safe-area-inset-bottom));
+}
+.image-login-brand { width: min(100%, 650px); flex: none; }
+.image-login-brand img { display: block; width: 100%; height: auto; }
+.image-login-access { position: relative; z-index: 1; width: min(82%, 480px); margin-top: 28px; }
+.image-login-actions { display: grid; gap: 18px; width: 100%; }
+.image-login .image-login-button {
+  width: 100%; min-height: 56px; height: auto; padding: 14px 16px;
+  border: 1px solid var(--login-edge); border-radius: 8px;
+  background: var(--login-field); color: var(--login-text);
+  box-shadow: var(--login-button-shadow); font-size: 16px; letter-spacing: 0;
+  white-space: normal; line-height: 1.4;
+}
+.image-login .image-login-button svg { width: 22px; height: 22px; }
+.image-login .image-login-primary { background: var(--login-button); }
+.image-login .image-login-button:hover { border-color: var(--login-gold); filter: brightness(1.12); }
+.image-login-divider { display: flex; align-items: center; gap: 18px; color: var(--login-gold); font-size: 13px; }
+.image-login-divider span { height: 1px; flex: 1; background: color-mix(in oklab, var(--login-gold) 38%, transparent); }
+.image-login-label { font-size: 16px; color: var(--login-text); }
+.image-login-input-wrap { display: flex; align-items: center; gap: 12px; padding: 0 12px; min-height: 58px; border: 1px solid var(--login-edge); border-radius: 8px; background: var(--login-field); }
+.image-login-input-wrap > svg { flex: none; }
+.image-login-input-wrap:focus-within { outline: 2px solid var(--login-gold); outline-offset: 3px; }
+.image-login .image-login-input { min-width: 0; height: 56px; padding: 0; border: 0; background: transparent; color: var(--login-text); font-size: 16px; box-shadow: none; outline: none; }
+.image-login-input::placeholder { color: color-mix(in oklab, var(--login-text) 60%, transparent); }
+.image-login .image-login-eye { flex: none; width: 40px; height: 40px; background: transparent; color: var(--login-text); box-shadow: none; }
+.image-login-loading { display: grid; justify-items: center; gap: 20px; min-height: 140px; }
+.image-login-floor { position: absolute; bottom: 0; z-index: -1; width: 100%; height: 180px; object-fit: cover; object-position: center bottom; pointer-events: none; }
+@media (max-width: 600px) {
+  .image-login-access { margin-top: 20px; }
+  .image-login-actions { gap: 16px; }
+  .image-login-floor { height: 110px; }
+}

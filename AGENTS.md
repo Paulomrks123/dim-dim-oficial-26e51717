@@ -43,3 +43,4 @@ use the editor.
 - CinematicScene owns decorative pointer/scroll parallax planes with requestAnimationFrame and reduced-motion cleanup; shared CSS owns materials and reveal motion so financial content remains stationary and readable.
 - Preserve the pre-migration financial schema in a replay-safe managed baseline; verify reconstruction with isolated PostgreSQL tests so schema recovery never requires exporting user data.
 - Dashboard currency uses FitAmount to measure its available width and shrink only when needed; keep monetary strings unbroken so compact cards never split cents onto another line.
+- Login artwork uses CDN-hosted crops for the brand and floor, with actual OAuth/PIN controls between them; never render mockup fields as if they were interactive.
