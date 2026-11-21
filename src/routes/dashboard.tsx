@@ -13,7 +13,6 @@ import { byDescendingValue } from "@/lib/chart-order";
 import { IncomeShareChart } from "@/components/IncomeShareChart";
 import { Button } from "@/components/ui/button";
 import { FitAmount } from "@/components/FitAmount";
-import { FinancialMetrics } from "@/components/FinancialMetrics";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [
@@ -185,8 +184,6 @@ function Body({ onAddTransaction }: { onAddTransaction: (type: "income" | "expen
             );
           })}
         </div>
-
-        <FinancialMetrics transactions={transactions} />
 
         {/* Saldo */}
         <Button variant="ghost" onClick={() => show({ title: "Saldo Atual", subtitle: range(mk), rows: [{ label: "Receitas", value: brl(m.income), tone: "primary" }, { label: "Despesas", value: brl(m.expense), tone: "destructive" }, { label: "Saldo", value: brl(m.balance), tone: m.balance >= 0 ? "primary" : "destructive" }, { label: "Economia", value: m.income ? `${((m.balance / m.income) * 100).toFixed(1)}% da receita` : "—" }], transactions: recentMonthTx, action: { label: "Adicionar transação", onClick: () => onAddTransaction("expense") } })} className="balance-panel flex h-auto w-full whitespace-normal items-center gap-3 rounded-lg border border-primary px-4 py-4 text-left fx-shine">
