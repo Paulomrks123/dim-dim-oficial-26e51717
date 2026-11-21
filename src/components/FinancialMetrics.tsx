@@ -1,4 +1,4 @@
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import {
   Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer,
   Tooltip, XAxis,
@@ -42,6 +42,14 @@ function MetricCard({ kind, title, value, days, previousValue, colorTone, range 
   previousValue: number; colorTone: "positive" | "negative" | "neutral"; range: MetricsRange;
 }) {
   const [mode, setMode] = useState<Mode>("curve");
+  const [reduceMotion, setReduceMotion] = useState(false);
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReduceMotion(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
   const gradientId = useId().replace(/:/g, "");
   const valueKey = kind === "income" ? "income" : kind === "expense" ? "expense" : "result";
   const series = days.map((day) => ({ ...day, label: day.date }));
@@ -51,7 +59,7 @@ function MetricCard({ kind, title, value, days, previousValue, colorTone, range 
   const delta = stats.last - stats.previous;
   const toneClass = colorTone === "positive" ? "text-emerald-500" : colorTone === "negative" ? "text-destructive" : "text-muted-foreground";
   const chartColor = colorTone === "positive" ? "var(--primary)" : colorTone === "negative" ? "var(--destructive)" : "var(--muted-foreground)";
-  const changeIsGood = kind === "expense" ? change !== null && change < 0 : kind === "result" ? value >= 0 && (change ?? 0) >= 0 : change !== null && change > 0;
+  const changeIsGood = kind === "expense" ? change !== null && change < 0 : kind === "result" || kind === "cashflow" ? value > previousValue : change !== null && change > 0;
   const changeClass = change === null || change === 0 ? "text-muted-foreground" : changeIsGood ? "text-emerald-500" : "text-destructive";
   const Icon = change === null || change === 0 ? Minus : changeIsGood ? TrendingUp : TrendingDown;
   const statsTitle = kind === "cashflow" ? "Resultado diário" : "Diário";
@@ -86,9 +94,9 @@ function MetricCard({ kind, title, value, days, previousValue, colorTone, range 
                 <XAxis dataKey="date" hide />
                 <Tooltip content={<MetricTooltip kind={kind} />} />
                 {kind === "cashflow" ? <>
-                  <Area type="monotone" dataKey="income" name="Entradas" stroke="var(--primary)" fill={`url(#${gradientId}-income)`} strokeWidth={2} dot={false} activeDot={{ r: 4 }} isAnimationActive animationDuration={850} />
+                  <Area type="monotone" dataKey="income" name="Entradas" stroke="var(--primary)" fill={`url(#${gradientId}-income)`} strokeWidth={2} dot={false} activeDot={{ r: 4 }} isAnimationActive={!reduceMotion} animationDuration={850} />
                   <Area type="monotone" dataKey="expense" name="Saídas" stroke="var(--destructive)" fill={`url(#${gradientId}-expense)`} strokeWidth={2} dot={false} activeDot={{ r: 4 }} isAnimationActive animationDuration={850} />
-                </> : <Area type="monotone" dataKey={valueKey} stroke={chartColor} fill={`url(#${gradientId}-result)`} strokeWidth={2.5} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} isAnimationActive animationDuration={900} />}
+                </> : <Area type="monotone" dataKey={valueKey} stroke={chartColor} fill={`url(#${gradientId}-result)`} strokeWidth={2.5} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} isAnimationActive={!reduceMotion} animationDuration={900} />}
               </AreaChart>
             ) : (
               <BarChart data={series} margin={{ top: 28, right: 2, left: 2, bottom: 0 }} barCategoryGap="28%">
@@ -96,9 +104,9 @@ function MetricCard({ kind, title, value, days, previousValue, colorTone, range 
                 <XAxis dataKey="date" hide />
                 <Tooltip content={<MetricTooltip kind={kind} />} cursor={{ fill: "var(--muted)", opacity: 0.3 }} />
                 {kind === "cashflow" ? <>
-                  <Bar dataKey="income" name="Entradas" fill="var(--primary)" radius={[4, 4, 1, 1]} isAnimationActive animationDuration={700} />
+                  <Bar dataKey="income" name="Entradas" fill="var(--primary)" radius={[4, 4, 1, 1]} isAnimationActive={!reduceMotion} animationDuration={700} />
                   <Bar dataKey="expense" name="Saídas" fill="var(--destructive)" radius={[4, 4, 1, 1]} isAnimationActive animationDuration={700} />
-                </> : <Bar dataKey={valueKey} fill={chartColor} radius={[5, 5, 1, 1]} isAnimationActive animationDuration={750} />}
+                </> : <Bar dataKey={valueKey} fill={chartColor} radius={[5, 5, 1, 1]} isAnimationActive={!reduceMotion} animationDuration={750} />}
               </BarChart>
             )}
           </ResponsiveContainer>
