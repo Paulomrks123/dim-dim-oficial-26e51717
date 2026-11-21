@@ -95,7 +95,7 @@ function MetricCard({ kind, title, value, days, previousValue, colorTone, range 
                 <Tooltip content={<MetricTooltip kind={kind} />} />
                 {kind === "cashflow" ? <>
                   <Area type="monotone" dataKey="income" name="Entradas" stroke="var(--primary)" fill={`url(#${gradientId}-income)`} strokeWidth={2} dot={false} activeDot={{ r: 4 }} isAnimationActive={!reduceMotion} animationDuration={850} />
-                  <Area type="monotone" dataKey="expense" name="Saídas" stroke="var(--destructive)" fill={`url(#${gradientId}-expense)`} strokeWidth={2} dot={false} activeDot={{ r: 4 }} isAnimationActive animationDuration={850} />
+                  <Area type="monotone" dataKey="expense" name="Saídas" stroke="var(--destructive)" fill={`url(#${gradientId}-expense)`} strokeWidth={2} dot={false} activeDot={{ r: 4 }} isAnimationActive={!reduceMotion} animationDuration={850} />
                 </> : <Area type="monotone" dataKey={valueKey} stroke={chartColor} fill={`url(#${gradientId}-result)`} strokeWidth={2.5} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} isAnimationActive={!reduceMotion} animationDuration={900} />}
               </AreaChart>
             ) : (
@@ -105,7 +105,7 @@ function MetricCard({ kind, title, value, days, previousValue, colorTone, range 
                 <Tooltip content={<MetricTooltip kind={kind} />} cursor={{ fill: "var(--muted)", opacity: 0.3 }} />
                 {kind === "cashflow" ? <>
                   <Bar dataKey="income" name="Entradas" fill="var(--primary)" radius={[4, 4, 1, 1]} isAnimationActive={!reduceMotion} animationDuration={700} />
-                  <Bar dataKey="expense" name="Saídas" fill="var(--destructive)" radius={[4, 4, 1, 1]} isAnimationActive animationDuration={700} />
+                  <Bar dataKey="expense" name="Saídas" fill="var(--destructive)" radius={[4, 4, 1, 1]} isAnimationActive={!reduceMotion} animationDuration={700} />
                 </> : <Bar dataKey={valueKey} fill={chartColor} radius={[5, 5, 1, 1]} isAnimationActive={!reduceMotion} animationDuration={750} />}
               </BarChart>
             )}
@@ -125,10 +125,10 @@ function MetricCard({ kind, title, value, days, previousValue, colorTone, range 
 export function FinancialMetrics({ transactions }: { transactions: Transaction[] }) {
   const [range, setRange] = useState<MetricsRange>(7);
   const metrics = buildFinancialMetrics(transactions, range);
-  const configs: { kind: Kind; title: string; value: number; previous: number; tone: "positive" | "negative" | "neutral" }[] = [
-    { kind: "income", title: "Receitas", value: metrics.totals.income, previous: metrics.previousTotals.income, tone: metrics.totals.income > metrics.previousTotals.income ? "positive" : metrics.totals.income < metrics.previousTotals.income ? "negative" : "neutral" },
-    { kind: "expense", title: "Despesas", value: metrics.totals.expense, previous: metrics.previousTotals.expense, tone: metrics.totals.expense < metrics.previousTotals.expense ? "positive" : metrics.totals.expense > metrics.previousTotals.expense ? "negative" : "neutral" },
-    { kind: "result", title: "Resultado do período", value: metrics.totals.result, previous: metrics.previousTotals.result, tone: metrics.totals.result > 0 ? "positive" : metrics.totals.result < 0 ? "negative" : "neutral" },
+  const configs: { kind: Kind; title: string; value: number; previousValue: number; tone: "positive" | "negative" | "neutral" }[] = [
+    { kind: "income", title: "Receitas", value: metrics.totals.income, previousValue: metrics.previousTotals.income, tone: metrics.totals.income > metrics.previousTotals.income ? "positive" : metrics.totals.income < metrics.previousTotals.income ? "negative" : "neutral" },
+    { kind: "expense", title: "Despesas", value: metrics.totals.expense, previousValue: metrics.previousTotals.expense, tone: metrics.totals.expense < metrics.previousTotals.expense ? "positive" : metrics.totals.expense > metrics.previousTotals.expense ? "negative" : "neutral" },
+    { kind: "result", title: "Resultado do período", value: metrics.totals.result, previousValue: metrics.previousTotals.result, tone: metrics.totals.result > 0 ? "positive" : metrics.totals.result < 0 ? "negative" : "neutral" },
     { kind: "cashflow", title: "Fluxo de caixa", value: metrics.totals.result, previous: metrics.previousTotals.result, tone: metrics.totals.result > 0 ? "positive" : metrics.totals.result < 0 ? "negative" : "neutral" },
   ];
   return (
@@ -140,7 +140,7 @@ export function FinancialMetrics({ transactions }: { transactions: Transaction[]
         </div>
       </div>
       <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
-        {configs.map((config) => <MetricCard key={config.kind} {...config} days={metrics.days} previousValue={config.previous} range={range} colorTone={config.tone} />)}
+        {configs.map((config) => <MetricCard key={config.kind} {...config} days={metrics.days} previousValue={config.previousValue} range={range} colorTone={config.tone} />)}
       </div>
       {transactions.length === 0 && <p className="text-center text-xs text-muted-foreground">Adicione uma transação para visualizar sua evolução financeira.</p>}
     </section>
